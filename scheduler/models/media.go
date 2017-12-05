@@ -1,10 +1,9 @@
 package models
 
-import "github.com/contentplanner/scheduler/scheduler/common"
-
 type Media interface {
-	Validate(common.Credentials) bool
-	Post(*Post, common.Credentials) error
+	Validate() bool
+	Post(*Post) error
+	GetPosts(int) (interface{}, error)
 	MarshalJSON() ([]byte, error)
 	UnmarshalJSON([]byte) error
 }

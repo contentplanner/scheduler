@@ -5,9 +5,9 @@ import (
 )
 
 type Account struct {
-	ID    int    `storm:"id,increment"`
-	Name  string `storm:"index"`
-	Media Media
+	ID    int    `storm:"id,increment" json:"id"`
+	Name  string `storm:"index" json:"name"`
+	Media Media  `json:"media"`
 }
 
 func (ac *Account) UnmarshalJSON(b []byte) error {
@@ -18,11 +18,11 @@ func (ac *Account) UnmarshalJSON(b []byte) error {
 	}
 
 	// ID and Name
-	ac.ID = int(objMap["ID"].(float64))
-	ac.Name = objMap["Name"].(string)
+	ac.ID = int(objMap["id"].(float64))
+	ac.Name = objMap["name"].(string)
 
 	// media
-	mediaMap := objMap["Media"].(map[string]interface{})
+	mediaMap := objMap["media"].(map[string]interface{})
 	mediaMapBytes, err := json.Marshal(mediaMap)
 	if err != nil {
 		return err

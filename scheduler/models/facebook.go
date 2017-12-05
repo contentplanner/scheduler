@@ -7,10 +7,18 @@ import (
 	"github.com/huandu/facebook"
 )
 
-type Facebook struct {
-	ID    string
-	Token string
-}
+type (
+	Facebook struct {
+		ID    string
+		Token string
+	}
+	facebookPost struct {
+		ID          string `facebook:"id"`
+		PublishTime string `facebook:"scheduled_publish_time"`
+		Message     string `facebook:"message"`
+		Type        string `facebook:"type"`
+	}
+)
 
 func (fb *Facebook) MarshalJSON() ([]byte, error) {
 	m := make(map[string]string)
@@ -30,12 +38,12 @@ func (fb *Facebook) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (fb *Facebook) Validate(creds common.Credentials) bool {
-	return creds.Facebook.AppID != "" && creds.Facebook.AppSecret != ""
+func (fb *Facebook) Validate() bool {
+	return common.Credentials.Facebook.AppID != "" && common.Credentials.Facebook.AppSecret != ""
 }
 
-func (fb *Facebook) Post(post *Post, creds common.Credentials) error {
-	fbApp := facebook.New(creds.Facebook.AppID, creds.Facebook.AppSecret)
+func (fb *Facebook) Post(post *Post) error {
+	fbApp := facebook.New(common.Credentials.Facebook.AppID, common.Credentials.Facebook.AppSecret)
 
 	// validate fb session
 	session := fbApp.Session(fb.Token)
@@ -58,4 +66,32 @@ func (fb *Facebook) Post(post *Post, creds common.Credentials) error {
 	// Post to feed
 	_, err = session.Post("/"+fb.ID+"/feed", params)
 	return err
+}
+
+func (fb *Facebook) GetPosts(page int) (interface{}, error) {
+	fbApp := facebook.New(common.Credentials.Facebook.AppID, common.Credentials.Facebook.AppSecret)
+
+	// validate fb session
+	session := fbApp.Session(fb.Token)
+	err := session.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := session.Get("/"+fb.ID+"/scheduled_posts", facebook.Params{
+		"fields": "id,scheduled_publish_time,message,attachments,type",
+		"limit":  100,
+		"offset": 100 * (page - 1),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var posts []facebookPost
+	err = res.DecodeField("data", &posts)
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }

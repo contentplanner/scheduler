@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"github.com/asdine/storm"
+	"github.com/contentplanner/scheduler/scheduler/common"
 	"github.com/contentplanner/scheduler/scheduler/storage"
 )
 
@@ -15,7 +16,23 @@ func (scheduler *Scheduler) Close() error {
 	return scheduler.db.Close()
 }
 
-func New() (*Scheduler, error) {
+func (scheduler *Scheduler) SetFacebook(appID string, appSecret string) {
+	common.Credentials.Facebook.AppID = appID
+	common.Credentials.Facebook.AppSecret = appSecret
+}
+
+func New(db *storm.DB) (*Scheduler, error) {
+	scheduler := &Scheduler{
+		db: db,
+		AccountStorage: &storage.AccountStorage{
+			DB: db,
+		},
+		PostStorage: &storage.PostStorage{},
+	}
+	return scheduler, nil
+}
+
+func Default() (*Scheduler, error) {
 	db, err := storm.Open("scheduler.db")
 	if err != nil {
 		return nil, err
