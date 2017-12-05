@@ -25,7 +25,7 @@ func New(db *storm.DB) (*Scheduler, error) {
 	scheduler := &Scheduler{
 		db: db,
 		AccountStorage: &storage.AccountStorage{
-			DB: db,
+			DB: db.From("scheduler"),
 		},
 		PostStorage: &storage.PostStorage{},
 	}
@@ -41,7 +41,7 @@ func Default() (*Scheduler, error) {
 	scheduler := &Scheduler{
 		db: db,
 		AccountStorage: &storage.AccountStorage{
-			DB: db,
+			DB: db.From("scheduler"),
 		},
 		PostStorage: &storage.PostStorage{},
 	}

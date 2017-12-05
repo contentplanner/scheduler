@@ -6,7 +6,7 @@ import (
 )
 
 type AccountStorage struct {
-	DB *storm.DB
+	DB storm.Node
 }
 
 func (storage *AccountStorage) Add(account *models.Account) error {
